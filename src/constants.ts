@@ -21,7 +21,7 @@ export enum Rounding {
 
 export const FACTORY_ADDRESS = '0xBCfCcbde45cE874adCB698cC183deBcF17952812'
 
-export const INIT_CODE_HASH = '0xd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66'
+export const INIT_CODE_HASH = '0xd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66' // TODO: init code hash from pair contract in prod
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 
@@ -31,10 +31,12 @@ export const ONE = JSBI.BigInt(1)
 export const TWO = JSBI.BigInt(2)
 export const THREE = JSBI.BigInt(3)
 export const FIVE = JSBI.BigInt(5)
+export const EIGHT = JSBI.BigInt(8)
 export const TEN = JSBI.BigInt(10)
 export const _100 = JSBI.BigInt(100)
 export const _998 = JSBI.BigInt(998)
 export const _1000 = JSBI.BigInt(1000)
+export const _10000 = JSBI.BigInt(10000)
 
 export enum SolidityType {
   uint8 = 'uint8',

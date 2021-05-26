@@ -59,17 +59,32 @@ export abstract class Fetcher {
    * Fetches information about a pair and constructs a pair from the given two tokens.
    * @param tokenA first token
    * @param tokenB second token
+   * @param isXybk if the pool is using xybk invariant or not
+   * @param fee fee of the pool in basis points
+   * @param boost0 of the pool, to use when reserve0 > reserve1
+   * @param boost1 of the pool, to use when reserve1 > reserve0
    * @param provider the provider to use to fetch the data
    */
   public static async fetchPairData(
     tokenA: Token,
     tokenB: Token,
+    isXybk: Boolean,
+    fee: number,
+    boost0: number,
+    boost1: number,
     provider = getDefaultProvider(getNetwork(tokenA.chainId))
   ): Promise<Pair> {
     invariant(tokenA.chainId === tokenB.chainId, 'CHAIN_ID')
     const address = Pair.getAddress(tokenA, tokenB)
     const [reserves0, reserves1] = await new Contract(address, IPancakePair.abi, provider).getReserves()
     const balances = tokenA.sortsBefore(tokenB) ? [reserves0, reserves1] : [reserves1, reserves0]
-    return new Pair(new TokenAmount(tokenA, balances[0]), new TokenAmount(tokenB, balances[1]))
+    return new Pair(
+      new TokenAmount(tokenA, balances[0]),
+      new TokenAmount(tokenB, balances[1]),
+      isXybk,
+      fee,
+      boost0,
+      boost1
+    )
   }
 }

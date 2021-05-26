@@ -14,7 +14,7 @@ describe.skip('data', () => {
 
   it('Pair', async () => {
     const token = new Token(ChainId.BSCTESTNET, '0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735', 18) // DAI
-    const pair = await Fetcher.fetchPairData(WETH[ChainId.BSCTESTNET], token)
+    const pair = await Fetcher.fetchPairData(WETH[ChainId.BSCTESTNET], token, false, 30, 1, 1)
     expect(pair.liquidityToken.address).toEqual('0x8B22F85d0c844Cf793690F6D9DFE9F11Ddb35449')
   })
 })

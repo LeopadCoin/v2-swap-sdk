@@ -18,6 +18,10 @@ function decimalize(amount: number, decimals: number): bigint {
   return BigInt(amount) * BigInt(10) ** BigInt(decimals)
 }
 
+const BasicPair = (a: TokenAmount, b: TokenAmount): Pair => {
+  return new Pair(a, b, false, 30, 1, 1)
+}
+
 describe('entities', () => {
   DECIMAL_PERMUTATIONS.forEach(decimals => {
     describe(`decimals permutation: ${decimals}`, () => {
@@ -34,15 +38,15 @@ describe('entities', () => {
       let pairs: Pair[]
       it('Pair', () => {
         pairs = [
-          new Pair(
+          BasicPair(
             new TokenAmount(tokens[0], decimalize(1, tokens[0].decimals)),
             new TokenAmount(tokens[1], decimalize(1, tokens[1].decimals))
           ),
-          new Pair(
+          BasicPair(
             new TokenAmount(tokens[1], decimalize(1, tokens[1].decimals)),
             new TokenAmount(tokens[2], decimalize(1, tokens[2].decimals))
           ),
-          new Pair(
+          BasicPair(
             new TokenAmount(tokens[2], decimalize(1, tokens[2].decimals)),
             new TokenAmount(WETH, decimalize(1234, WETH.decimals))
           )
@@ -102,7 +106,7 @@ describe('entities', () => {
         it('TradeType.EXACT_INPUT', () => {
           route = new Route(
             [
-              new Pair(
+              BasicPair(
                 new TokenAmount(tokens[1], decimalize(5, tokens[1].decimals)),
                 new TokenAmount(WETH, decimalize(10, WETH.decimals))
               )
@@ -152,7 +156,7 @@ describe('entities', () => {
           if ([9, 18].includes(tokens[1].decimals)) {
             const route = new Route(
               [
-                new Pair(
+                BasicPair(
                   new TokenAmount(tokens[1], decimalize(1, tokens[1].decimals)),
                   new TokenAmount(
                     WETH,

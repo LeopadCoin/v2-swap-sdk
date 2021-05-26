@@ -9,13 +9,17 @@ function checkDeadline(deadline: string[] | string): void {
   expect(new Date().getTime() / 1000 - parseInt(deadline)).toBeLessThanOrEqual(5)
 }
 
+const BasicPair = (a: TokenAmount, b: TokenAmount): Pair => {
+  return new Pair(a, b, false, 30, 1, 1)
+}
+
 describe('Router', () => {
   const token0 = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000001', 18, 't0')
   const token1 = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000002', 18, 't1')
 
-  const pair_0_1 = new Pair(new TokenAmount(token0, JSBI.BigInt(1000)), new TokenAmount(token1, JSBI.BigInt(1000)))
+  const pair_0_1 = BasicPair(new TokenAmount(token0, JSBI.BigInt(1000)), new TokenAmount(token1, JSBI.BigInt(1000)))
 
-  const pair_weth_0 = new Pair(new TokenAmount(WETH[ChainId.MAINNET], '1000'), new TokenAmount(token0, '1000'))
+  const pair_weth_0 = BasicPair(new TokenAmount(WETH[ChainId.MAINNET], '1000'), new TokenAmount(token0, '1000'))
 
   describe('#swapCallParameters', () => {
     describe('exact in', () => {
