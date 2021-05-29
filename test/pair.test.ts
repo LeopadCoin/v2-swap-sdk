@@ -232,6 +232,10 @@ describe('Pair', () => {
         ).getOutputAmount(input)
         expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
         expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+
+        expect(output[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
+        expect(output[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        expect(output[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
       })
     })
 
@@ -249,6 +253,10 @@ describe('Pair', () => {
 
         expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
         expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+
+        expect(input[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
+        expect(input[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        expect(input[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
       })
     })
   })
@@ -290,6 +298,10 @@ describe('Pair', () => {
 
         expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
         expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+
+        expect(output[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
+        expect(output[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        expect(output[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
       })
     })
 
@@ -307,6 +319,10 @@ describe('Pair', () => {
 
         expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
         expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+
+        expect(input[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
+        expect(input[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        expect(input[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
       })
     })
   })
