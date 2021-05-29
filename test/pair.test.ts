@@ -253,7 +253,7 @@ describe('Pair', () => {
     })
   })
 
-  describe('xybk amount calculations', () => {
+  describe('xybk amount calculations, single boost', () => {
     // test values from ImpossiblePair.spec.ts in impossible-swap-core
     const tests = [
       {
@@ -288,18 +288,8 @@ describe('Pair', () => {
           10
         ).getOutputAmount(input)
 
-        if (!JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))) {
-          console.log('less than failed')
-          console.log(output[0].raw.toString(10))
-          console.log(elem.amount1)
-        }
-        if (!JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))) {
-          console.log('greater than failed')
-          console.log(output[0].raw.toString(10))
-          console.log(elem.amount1)
-        }
-        //expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
-        //expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
       })
     })
 
@@ -313,6 +303,65 @@ describe('Pair', () => {
           30,
           10,
           10
+        ).getInputAmount(output)
+
+        expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+        expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+      })
+    })
+  })
+
+  describe('xybk amount calculations, double boost', () => {
+    // test values from ImpossiblePair.spec.ts in impossible-swap-core
+    const tests = [
+      {
+        reserve0: '9800000000000000000', // Pool of 98: 100
+        reserve1: '10000000000000000000', // Trade 10 in
+        amount0: '1000000000000000000', // Diff is 99954086114463808 => 0.99
+        //
+        amount1: '994198251217880553' // These numbers are obviously wrong
+      },
+      {
+        reserve0: '102324241243449991944', // Pool of 102:124
+        reserve1: '124882484835838434422', // Trade 50 in
+        amount0: '50000000000000000000',
+        amount1: '49488329728372278747'
+      },
+      {
+        reserve0: '1242493953959349219344', // Pool of 1242:1310
+        reserve1: '1310000000000000000000', // Trade 1000 in
+        amount0: '1000000000000000000000',
+        amount1: '971795130187252602770'
+      }
+    ]
+
+    it('should be within +- 5wei', () => {
+      tests.forEach(elem => {
+        let input: TokenAmount = new TokenAmount(USDC, elem.amount0)
+        let output: [TokenAmount, Pair] = new Pair(
+          new TokenAmount(USDC, elem.reserve0),
+          new TokenAmount(DAI, elem.reserve1),
+          true,
+          30,
+          11, // Boost0 = 11, boost1 = 28
+          28
+        ).getOutputAmount(input)
+
+        expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+      })
+    })
+
+    it('should be within +- 5wei', () => {
+      tests.forEach(elem => {
+        let output: TokenAmount = new TokenAmount(DAI, elem.amount1)
+        let input: [TokenAmount, Pair] = new Pair(
+          new TokenAmount(USDC, elem.reserve0),
+          new TokenAmount(DAI, elem.reserve1),
+          true,
+          30,
+          11, // boost0 = 11, boost1 = 28
+          28
         ).getInputAmount(output)
 
         expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)

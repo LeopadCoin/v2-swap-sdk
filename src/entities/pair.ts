@@ -240,10 +240,9 @@ export class Pair {
         // If balance started from <SqrtK and ended at >SqrtK and boosts are different, there'll be different amountIn/Out
         // Don't need to check in other case for reserveIn < reserveIn.add(x) <= SqrtK since that case doesnt cross midpt
         if (this.boost0 !== this.boost1 && JSBI.greaterThan(this.SqrtK, inputReserveJSBI)) {
-          // Break into 2 trades => start point -> midpoint (SqrtK, SqrtK), then midpoint -> final point
           outputAmountJSBI = JSBI.subtract(outputReserveJSBI, this.SqrtK)
           let diff: TokenAmount = new TokenAmount(inputAmount.token, JSBI.subtract(this.SqrtK, inputReserveJSBI))
-          inputAmountWithFee = JSBI.subtract(inputAmountWithFee, diff.raw)
+          inputAmountWithFee = JSBI.subtract(inputAmountWithFee, JSBI.multiply(diff.raw, _10000)) // This is multiplied by 10k
           inputAmount.add(diff)
           inputReserve.add(diff)
           // If tokenIn = token0, balanceIn > sqrtK => balance0>sqrtK, use boost0
@@ -295,7 +294,7 @@ export class Pair {
       throw new InsufficientReservesError()
     }
 
-    const outputReserve: TokenAmount = this.reserveOf(outputAmount.token)
+    let outputReserve: TokenAmount = this.reserveOf(outputAmount.token)
     const inputReserve: TokenAmount = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
 
     let outputReserveJSBI: JSBI = outputReserve.raw
@@ -316,8 +315,9 @@ export class Pair {
         if (this.boost0 !== this.boost1 && JSBI.greaterThan(outputReserveJSBI, this.SqrtK)) {
           // Break into 2 trades => start point -> midpoint (SqrtK, SqrtK), then midpoint -> final point
           let diff: TokenAmount = new TokenAmount(outputAmount.token, JSBI.subtract(outputReserveJSBI, this.SqrtK))
-          outputAmount.subtract(diff)
-          outputReserve.subtract(diff)
+          outputAmount = outputAmount.subtract(diff)
+          outputReserve = outputReserve.subtract(diff)
+          outputReserveJSBI = JSBI.subtract(outputReserveJSBI, diff.raw)
           inputAmountJSBI = JSBI.divide(
             JSBI.multiply(JSBI.subtract(this.SqrtK, inputReserveJSBI), _10000),
             JSBI.BigInt(10000 - this.fee)
