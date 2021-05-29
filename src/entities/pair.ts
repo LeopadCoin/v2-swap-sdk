@@ -69,8 +69,8 @@ export class Pair {
       tokenAmounts[0].token.chainId,
       Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token),
       18,
-      'UNI-V2', // TODO: should this be changed?
-      'Uniswap V2' // TODO: should this be changed?
+      'IF-LP',
+      'Impossible Swap LPs'
     )
     this.tokenAmounts = tokenAmounts as [TokenAmount, TokenAmount]
     this.isXybk = isXybk
@@ -222,8 +222,8 @@ export class Pair {
     let inputReserve: TokenAmount = this.reserveOf(inputAmount.token)
     let outputReserve: TokenAmount = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0)
 
-    let outputReserveJSBI: JSBI = outputReserve.raw // TODO: Does it deep copy?
-    let inputReserveJSBI: JSBI = inputReserve.raw // TODO: Does it deep copy?
+    let outputReserveJSBI: JSBI = outputReserve.raw
+    let inputReserveJSBI: JSBI = inputReserve.raw
 
     let outputAmountJSBI: JSBI = JSBI.BigInt(0)
     let inputAmountWithFee = JSBI.multiply(inputAmount.raw, JSBI.BigInt(10000 - this.fee))
@@ -298,8 +298,8 @@ export class Pair {
     const outputReserve: TokenAmount = this.reserveOf(outputAmount.token)
     const inputReserve: TokenAmount = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
 
-    let outputReserveJSBI: JSBI = outputReserve.raw // TODO: Does it deep copy?
-    let inputReserveJSBI: JSBI = inputReserve.raw // TODO: Does it deep copy?
+    let outputReserveJSBI: JSBI = outputReserve.raw
+    let inputReserveJSBI: JSBI = inputReserve.raw
 
     const isMatch: Boolean = outputAmount.token.equals(this.token0)
     let inputAmountJSBI: JSBI = JSBI.BigInt(0)
