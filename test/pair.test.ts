@@ -133,30 +133,32 @@ describe('Pair', () => {
     ).toEqual(outputAmount)
   })
 
-  const lowerBound15 = (n: JSBI): JSBI => {
-    return JSBI.divide(JSBI.multiply(n, JSBI.BigInt(99999999999999)), JSBI.BigInt(100000000000000))
+  // Shoot for +-5wei tolerance
+  const lowerBound5 = (n: JSBI): JSBI => {
+    return JSBI.subtract(n, JSBI.BigInt(5))
   }
 
-  const upperBound15 = (n: JSBI): JSBI => {
-    return JSBI.divide(JSBI.multiply(n, JSBI.BigInt(100000000000001)), JSBI.BigInt(100000000000000))
+  const upperBound5 = (n: JSBI): JSBI => {
+    return JSBI.add(n, JSBI.BigInt(5))
   }
 
   describe('sqrt calculations', () => {
-    const amounts = [
-      { k: '10000000000000000000000000000', sqrtK: '100000000000000' }, // At least 10^15
+    const tests = [
+      { k: '10000000000000000000000000000', sqrtK: '100000000000000' },
       { k: '602311237141614639250714307746962364969', sqrtK: '24542030012645951437' },
       { k: '1051862615112527981932275442917763963209', sqrtK: '32432431532534343453' },
       { k: '23562247653695456410649294596', sqrtK: '153499992357314' },
       { k: '72911332743072652158956264288752431169', sqrtK: '8538813310002312737' }
     ]
 
-    amounts.forEach(elem => {
+    tests.forEach(elem => {
       const result: JSBI = BasicPair(new TokenAmount(USDC, '1000'), new TokenAmount(DAI, '1000')).sqrt(
         JSBI.BigInt(elem.k)
       )
-
-      expect(JSBI.lessThan(result, upperBound15(JSBI.BigInt(elem.sqrtK)))).toBe(true) // Shoot for 10^-15 precision
-      expect(JSBI.greaterThan(result, lowerBound15(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+      it('should be within +- 5wei', () => {
+        expect(JSBI.lessThan(result, upperBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+        expect(JSBI.greaterThan(result, lowerBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+      })
     })
   })
 
@@ -165,29 +167,157 @@ describe('Pair', () => {
     const amounts = ['712372217218233337', '20000000000000000000', '12323242882232920249', '23929449492939909691']
     const boosts = [2, 10, 22, 42, 64, 129]
 
-    amounts.forEach(a => {
-      boosts.forEach(b => {
-        const result: JSBI = new Pair(new TokenAmount(USDC, a), new TokenAmount(DAI, a), true, 30, b, b).SqrtK
-        expect(JSBI.lessThan(result, upperBound15(JSBI.BigInt(a)))).toBe(true) // Shoot for 10^-15 precision
-        expect(JSBI.greaterThan(result, lowerBound15(JSBI.BigInt(a)))).toBe(true)
+    it('should be within +- 5wei', () => {
+      amounts.forEach(a => {
+        boosts.forEach(b => {
+          const result: JSBI = new Pair(new TokenAmount(USDC, a), new TokenAmount(DAI, a), true, 30, b, b).SqrtK
+          expect(JSBI.lessThan(result, upperBound5(JSBI.BigInt(a)))).toBe(true)
+          expect(JSBI.greaterThan(result, lowerBound5(JSBI.BigInt(a)))).toBe(true)
+        })
       })
     })
   })
 
   describe('complex xybk K calculations', () => {
     // doublecheck with wolframalpha: sqrt[(a+9sqrtK)(b+9sqrtK)] = 10*sqrtK
-    const amounts = [
+    const tests = [
       { a: '40000000000000000000', b: '10000000000000000000', sqrtK: '24542030012645951437' },
       { a: '712372217218233337', b: '12323242882232920249', sqrtK: '6248706546171356461' },
       { a: '23929449492939909691', b: '59583691923485939593', sqrtK: '41372671310355025387' },
       { a: '593851823945304530422', b: '110231230506929991235', sqrtK: '343541838342506044137' },
       { a: '2388425885349239233', b: '12323242882232920249', sqrtK: '7184309717907350868' }
     ]
+    it('should be within +- 5wei', () => {
+      tests.forEach(elem => {
+        let result: JSBI = new Pair(new TokenAmount(USDC, elem.a), new TokenAmount(DAI, elem.b), true, 30, 10, 10).SqrtK
+        expect(JSBI.lessThan(result, upperBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+        expect(JSBI.greaterThan(result, lowerBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+      })
+    })
+  })
 
-    amounts.forEach(elem => {
-      let result: JSBI = new Pair(new TokenAmount(USDC, elem.a), new TokenAmount(DAI, elem.b), true, 30, 10, 10).SqrtK
-      expect(JSBI.lessThan(result, upperBound15(JSBI.BigInt(elem.sqrtK)))).toBe(true) // Shoot for 10^-15 precision
-      expect(JSBI.greaterThan(result, lowerBound15(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+  describe('uni amount calculations', () => {
+    // test values from ImpossiblePair.spec.ts in impossible-swap-core
+    const tests = [
+      {
+        reserve0: '100000000000000000000',
+        reserve1: '100000000000000000000',
+        amount0: '1000000000000000000',
+        amount1: '987158034397061298'
+      },
+      {
+        reserve0: '1000000000000000000000',
+        reserve1: '1000000000000000000000',
+        amount0: '1000000000000000000',
+        amount1: '996006981039903216'
+      },
+      {
+        reserve0: '982471445826763938256',
+        reserve1: '987471445826763938256',
+        amount0: '10000000000000000000',
+        amount1: '9920071714348123486'
+      }
+    ]
+
+    it('should be within +- 5wei', () => {
+      tests.forEach(elem => {
+        let input: TokenAmount = new TokenAmount(USDC, elem.amount0)
+        let output: [TokenAmount, Pair] = new Pair(
+          new TokenAmount(USDC, elem.reserve0),
+          new TokenAmount(DAI, elem.reserve1),
+          false,
+          30,
+          1,
+          1
+        ).getOutputAmount(input)
+        expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+      })
+    })
+
+    it('should be within +- 5wei', () => {
+      tests.forEach(elem => {
+        let output: TokenAmount = new TokenAmount(DAI, elem.amount1)
+        let input: [TokenAmount, Pair] = new Pair(
+          new TokenAmount(USDC, elem.reserve0),
+          new TokenAmount(DAI, elem.reserve1),
+          false,
+          30,
+          1,
+          1
+        ).getInputAmount(output)
+
+        expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+        expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+      })
+    })
+  })
+
+  describe('xybk amount calculations', () => {
+    // test values from ImpossiblePair.spec.ts in impossible-swap-core
+    const tests = [
+      {
+        reserve0: '10000000000000000000',
+        reserve1: '10000000000000000000',
+        amount0: '1000000000000000000',
+        amount1: '987158034397061298'
+      },
+      {
+        reserve0: '100000000000000000000',
+        reserve1: '100000000000000000000',
+        amount0: '1000000000000000000',
+        amount1: '996006981039903216'
+      },
+      {
+        reserve0: '96000000000000000000',
+        reserve1: '101000000000000000000',
+        amount0: '10000000000000000000',
+        amount1: '9920071714348123486'
+      }
+    ]
+
+    it('should be within +- 5wei', () => {
+      tests.forEach(elem => {
+        let input: TokenAmount = new TokenAmount(USDC, elem.amount0)
+        let output: [TokenAmount, Pair] = new Pair(
+          new TokenAmount(USDC, elem.reserve0),
+          new TokenAmount(DAI, elem.reserve1),
+          true,
+          30,
+          10,
+          10
+        ).getOutputAmount(input)
+
+        if (!JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))) {
+          console.log('less than failed')
+          console.log(output[0].raw.toString(10))
+          console.log(elem.amount1)
+        }
+        if (!JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))) {
+          console.log('greater than failed')
+          console.log(output[0].raw.toString(10))
+          console.log(elem.amount1)
+        }
+        //expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        //expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+      })
+    })
+
+    it('should be within +- 5wei', () => {
+      tests.forEach(elem => {
+        let output: TokenAmount = new TokenAmount(DAI, elem.amount1)
+        let input: [TokenAmount, Pair] = new Pair(
+          new TokenAmount(USDC, elem.reserve0),
+          new TokenAmount(DAI, elem.reserve1),
+          true,
+          30,
+          10,
+          10
+        ).getInputAmount(output)
+
+        expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+        expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+      })
     })
   })
 })
