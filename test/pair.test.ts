@@ -133,13 +133,11 @@ describe('Pair', () => {
     ).toEqual(outputAmount)
   })
 
-  // Shoot for +-5wei tolerance
-  const lowerBound5 = (n: JSBI): JSBI => {
-    return JSBI.subtract(n, JSBI.BigInt(5))
-  }
+  const checkBounds = (actual: JSBI, expected: JSBI): boolean => {
+    let a: boolean = JSBI.greaterThan(actual, JSBI.subtract(expected, JSBI.BigInt(5)))
+    let b: boolean = JSBI.lessThan(actual, JSBI.add(expected, JSBI.BigInt(5)))
 
-  const upperBound5 = (n: JSBI): JSBI => {
-    return JSBI.add(n, JSBI.BigInt(5))
+    return a && b
   }
 
   describe('sqrt calculations', () => {
@@ -156,8 +154,7 @@ describe('Pair', () => {
         JSBI.BigInt(elem.k)
       )
       it('should be within +- 5wei', () => {
-        expect(JSBI.lessThan(result, upperBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
-        expect(JSBI.greaterThan(result, lowerBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+        expect(checkBounds(result, JSBI.BigInt(elem.sqrtK))).toBe(true)
       })
     })
   })
@@ -171,8 +168,7 @@ describe('Pair', () => {
       amounts.forEach(a => {
         boosts.forEach(b => {
           const result: JSBI = new Pair(new TokenAmount(USDC, a), new TokenAmount(DAI, a), true, 30, b, b).SqrtK
-          expect(JSBI.lessThan(result, upperBound5(JSBI.BigInt(a)))).toBe(true)
-          expect(JSBI.greaterThan(result, lowerBound5(JSBI.BigInt(a)))).toBe(true)
+          expect(checkBounds(result, JSBI.BigInt(a))).toBe(true)
         })
       })
     })
@@ -190,8 +186,7 @@ describe('Pair', () => {
     it('should be within +- 5wei', () => {
       tests.forEach(elem => {
         let result: JSBI = new Pair(new TokenAmount(USDC, elem.a), new TokenAmount(DAI, elem.b), true, 30, 10, 10).SqrtK
-        expect(JSBI.lessThan(result, upperBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
-        expect(JSBI.greaterThan(result, lowerBound5(JSBI.BigInt(elem.sqrtK)))).toBe(true)
+        expect(checkBounds(result, JSBI.BigInt(elem.sqrtK))).toBe(true)
       })
     })
   })
@@ -230,12 +225,17 @@ describe('Pair', () => {
           1,
           1
         ).getOutputAmount(input)
-        expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
-        expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        expect(checkBounds(output[0].raw, JSBI.BigInt(elem.amount1))).toBe(true)
 
         expect(output[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
-        expect(output[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
-        expect(output[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        expect(checkBounds(
+          output[1].reserve1.raw,
+          JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        ).toBe(true)
+        expect(checkBounds(
+          output[1].reserve0.raw,
+          JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        ).toBe(true)
       })
     })
 
@@ -251,12 +251,16 @@ describe('Pair', () => {
           1
         ).getInputAmount(output)
 
-        expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
-        expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
-
+        expect(checkBounds(input[0].raw, JSBI.BigInt(elem.amount0))).toBe(true)
         expect(input[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
-        expect(input[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
-        expect(input[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        expect(checkBounds(
+          input[1].reserve1.raw,
+          JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        ).toBe(true)
+        expect(checkBounds(
+          input[1].reserve0.raw,
+          JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        ).toBe(true)
       })
     })
   })
@@ -296,12 +300,17 @@ describe('Pair', () => {
           10
         ).getOutputAmount(input)
 
-        expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
-        expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        expect(checkBounds(output[0].raw, JSBI.BigInt(elem.amount1))).toBe(true)
 
         expect(output[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
-        expect(output[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
-        expect(output[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        expect(checkBounds(
+          output[1].reserve1.raw,
+          JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        ).toBe(true)
+        expect(checkBounds(
+          output[1].reserve0.raw,
+          JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        ).toBe(true)
       })
     })
 
@@ -317,12 +326,16 @@ describe('Pair', () => {
           10
         ).getInputAmount(output)
 
-        expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
-        expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
-
+        expect(checkBounds(input[0].raw, JSBI.BigInt(elem.amount0))).toBe(true)
         expect(input[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
-        expect(input[1].reserve1.raw).toEqual(JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
-        expect(input[1].reserve0.raw).toEqual(JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        expect(checkBounds(
+          input[1].reserve1.raw,
+          JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        ).toBe(true)
+        expect(checkBounds(
+          input[1].reserve0.raw,
+          JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        ).toBe(true)
       })
     })
   })
@@ -331,11 +344,10 @@ describe('Pair', () => {
     // test values from ImpossiblePair.spec.ts in impossible-swap-core
     const tests = [
       {
-        reserve0: '9800000000000000000', // Pool of 98: 100
-        reserve1: '10000000000000000000', // Trade 10 in
-        amount0: '1000000000000000000', // Diff is 99954086114463808 => 0.99
-        //
-        amount1: '994198251217880553' // These numbers are obviously wrong
+        reserve0: '98000000000000000000', // Pool of 98: 100
+        reserve1: '100000000000000000000', // Trade 10 in
+        amount0:   '10000000000000000000',
+        amount1:    '9941982512178805534'
       },
       {
         reserve0: '102324241243449991944', // Pool of 102:124
@@ -363,8 +375,17 @@ describe('Pair', () => {
           28
         ).getOutputAmount(input)
 
-        expect(JSBI.lessThan(output[0].raw, upperBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
-        expect(JSBI.greaterThan(output[0].raw, lowerBound5(JSBI.BigInt(elem.amount1)))).toBe(true)
+        expect(checkBounds(output[0].raw, JSBI.BigInt(elem.amount1))).toBe(true)
+
+        expect(output[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
+        expect(checkBounds(
+          output[1].reserve1.raw,
+          JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        ).toBe(true)
+        expect(checkBounds(
+          output[1].reserve0.raw,
+          JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        ).toBe(true)
       })
     })
 
@@ -380,8 +401,16 @@ describe('Pair', () => {
           28
         ).getInputAmount(output)
 
-        expect(JSBI.lessThan(input[0].raw, upperBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
-        expect(JSBI.greaterThan(input[0].raw, lowerBound5(JSBI.BigInt(elem.amount0)))).toBe(true)
+        expect(checkBounds(input[0].raw, JSBI.BigInt(elem.amount0))).toBe(true)
+        expect(input[1].token1).toEqual(USDC) // reserve1 in pair object corresponds to reserve0
+        expect(checkBounds(
+          input[1].reserve1.raw,
+          JSBI.add(JSBI.BigInt(elem.reserve0), JSBI.BigInt(elem.amount0)))
+        ).toBe(true)
+        expect(checkBounds(
+          input[1].reserve0.raw,
+          JSBI.subtract(JSBI.BigInt(elem.reserve1), JSBI.BigInt(elem.amount1)))
+        ).toBe(true)
       })
     })
   })
