@@ -89,11 +89,9 @@ export class Pair {
       return ONE
     }
 
-    //console.log("boost is: " + boost)
     const multiplier: JSBI = JSBI.BigInt(10000000000)
     const amount0: JSBI = JSBI.multiply(this.tokenAmounts[0].raw, multiplier)
     const amount1: JSBI = JSBI.multiply(this.tokenAmounts[1].raw, multiplier)
-    //console.log("amount0 is: " + amount0.toString(10) + " and amount1 is: " + amount1.toString(10))
 
 
     let term: JSBI = JSBI.divide(
@@ -106,7 +104,6 @@ export class Pair {
       JSBI.exponentiate(term, TWO)
     )
 
-    //console.log("sqrtK is: " + JSBI.divide(JSBI.add(this.sqrt(result), JSBI.BigInt(term)), multiplier).toString(10))
     return JSBI.divide(JSBI.add(this.sqrt(result), JSBI.BigInt(term)), multiplier)
   }
 
@@ -345,14 +342,6 @@ export class Pair {
       outputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(inputAmountJSBI, JSBI.add(JSBI.divide(numerator, denominator), ONE))
     )
-    /*console.log("amounts start")
-    console.log(inputReserve.raw.toString(10))
-    console.log(inputAmount.raw.toString(10))
-    console.log(outputReserve.raw.toString(10))
-    console.log(outputAmount.raw.toString(10))
-    console.log(inputReserve.add(inputAmount).raw.toString(10))
-    console.log(outputReserve.subtract(outputAmount).raw.toString(10))
-    console.log("amounts stop")*/
     return [
       inputAmount,
       new Pair(

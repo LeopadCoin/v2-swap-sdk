@@ -138,10 +138,7 @@ describe('Pair', () => {
   const checkBounds = (actual: JSBI, expected: JSBI): boolean => {
     let a: boolean = JSBI.greaterThan(actual, JSBI.subtract(expected, JSBI.BigInt(5)))
     let b: boolean = JSBI.lessThan(actual, JSBI.add(expected, JSBI.BigInt(5)))
-    if (!(a && b)) {
-      console.log("actual: " + actual.toString(10))
-      console.log("expected: " + expected.toString(10))
-    }
+
     return a && b
   }
 
