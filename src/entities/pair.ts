@@ -345,6 +345,14 @@ export class Pair {
       outputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.add(inputAmountJSBI, JSBI.add(JSBI.divide(numerator, denominator), ONE))
     )
+    /*console.log("amounts start")
+    console.log(inputReserve.raw.toString(10))
+    console.log(inputAmount.raw.toString(10))
+    console.log(outputReserve.raw.toString(10))
+    console.log(outputAmount.raw.toString(10))
+    console.log(inputReserve.add(inputAmount).raw.toString(10))
+    console.log(outputReserve.subtract(outputAmount).raw.toString(10))
+    console.log("amounts stop")*/
     return [
       inputAmount,
       new Pair(
