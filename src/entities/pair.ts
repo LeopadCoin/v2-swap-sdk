@@ -93,7 +93,6 @@ export class Pair {
     const amount0: JSBI = JSBI.multiply(this.tokenAmounts[0].raw, multiplier)
     const amount1: JSBI = JSBI.multiply(this.tokenAmounts[1].raw, multiplier)
 
-
     let term: JSBI = JSBI.divide(
       JSBI.multiply(JSBI.BigInt(boost - 1), JSBI.add(amount0, amount1)),
       JSBI.BigInt(boost * 4 - 2)
@@ -266,10 +265,13 @@ export class Pair {
     }
     const numerator = JSBI.multiply(inputAmountWithFee, outputReserveJSBI)
     const denominator = JSBI.add(JSBI.multiply(inputReserveJSBI, _10000), inputAmountWithFee)
+    const outputVal = JSBI.add(outputAmountJSBI, JSBI.divide(numerator, denominator))
+
     const outputAmount = new TokenAmount(
       inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
-      JSBI.add(outputAmountJSBI, JSBI.divide(numerator, denominator))
+      JSBI.greaterThan(outputReserve.raw, outputVal) ? outputVal : outputReserve.raw
     )
+
     if (JSBI.equal(outputAmount.raw, ZERO)) {
       throw new InsufficientInputAmountError()
     }
