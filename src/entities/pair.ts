@@ -145,7 +145,7 @@ export class Pair {
   }
 
   /**
-   * Returns the current mid price of the pair in terms of token0, i.e. the ratio of reserve1 to reserve0
+   * Returns the price of token 0 in token 1
    */
   public get token0Price(): Price {
     if (this.isXybk) {
@@ -157,8 +157,15 @@ export class Pair {
         JSBI.add(this.tokenAmounts[1].raw, term)
       )
     } else {
-      return new Price(this.token0, this.token1, this.tokenAmounts[0].raw, this.tokenAmounts[1].raw)
+      return this.token0LpPrice
     }
+  }
+
+  /**
+   * Returns the uni prices of token 0 in token 1
+   */
+  public get token0LpPrice(): Price {
+    return new Price(this.token0, this.token1, this.tokenAmounts[0].raw, this.tokenAmounts[1].raw)
   }
 
   /**
@@ -174,8 +181,15 @@ export class Pair {
         JSBI.add(this.tokenAmounts[0].raw, term)
       )
     } else {
-      return new Price(this.token1, this.token0, this.tokenAmounts[1].raw, this.tokenAmounts[0].raw)
+      return this.token1LpPrice
     }
+  }
+
+  /**
+   * Returns the uni prices of token 0 in token 1
+   */
+  public get token1LpPrice(): Price {
+    return new Price(this.token1, this.token0, this.tokenAmounts[1].raw, this.tokenAmounts[0].raw)
   }
 
   /**
@@ -185,6 +199,15 @@ export class Pair {
   public priceOf(token: Token): Price {
     invariant(this.involvesToken(token), 'TOKEN')
     return token.equals(this.token0) ? this.token0Price : this.token1Price
+  }
+
+  /**
+   * Return the price of the given token in terms of the other token in the pair.
+   * @param token token to return price of
+   */
+  public lpPriceOf(token: Token): Price {
+    invariant(this.involvesToken(token), 'TOKEN')
+    return token.equals(this.token0) ? this.token0LpPrice : this.token1LpPrice
   }
 
   /**
