@@ -109,11 +109,11 @@ export class Pair {
   /**
    * Returns artificial liquidity term [(boost-1)*SqrtK] to be added to real reserves for xybk invariant
    */
-  private artiLiquidityTerm(boost: number): JSBI {
+  public artiLiquidityTerm(boost: number): JSBI {
     return JSBI.multiply(JSBI.BigInt(boost - 1), this.SqrtK)
   }
 
-  private getBoost(): number {
+  public getBoost(): number {
     return JSBI.greaterThan(this.tokenAmounts[0].raw, this.tokenAmounts[1].raw) ? this.boost0 : this.boost1
   }
 

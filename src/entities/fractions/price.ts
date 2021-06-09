@@ -18,9 +18,25 @@ export class Price extends Fraction {
   public static fromRoute(route: Route): Price {
     const prices: Price[] = []
     for (const [i, pair] of route.pairs.entries()) {
+      let term: JSBI = pair.artiLiquidityTerm(pair.getBoost())
+
       prices.push(
         route.path[i].equals(pair.token0)
-          ? new Price(pair.reserve0.currency, pair.reserve1.currency, pair.reserve0.raw, pair.reserve1.raw)
+          ? pair.isXybk
+            ? new Price(
+                pair.reserve0.currency,
+                pair.reserve1.currency,
+                JSBI.add(pair.reserve0.raw, term),
+                JSBI.add(pair.reserve1.raw, term)
+              )
+            : new Price(pair.reserve0.currency, pair.reserve1.currency, pair.reserve0.raw, pair.reserve1.raw)
+          : pair.isXybk
+          ? new Price(
+              pair.reserve1.currency,
+              pair.reserve0.currency,
+              JSBI.add(pair.reserve1.raw, term),
+              JSBI.add(pair.reserve0.raw, term)
+            )
           : new Price(pair.reserve1.currency, pair.reserve0.currency, pair.reserve1.raw, pair.reserve0.raw)
       )
     }
